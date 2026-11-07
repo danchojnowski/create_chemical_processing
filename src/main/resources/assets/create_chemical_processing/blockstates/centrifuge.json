@@ -1,0 +1,1 @@
+{"variants":{"assembled=false,running=false":{"model":"create_chemical_processing:block/centrifuge"},"assembled=false,running=true":{"model":"create_chemical_processing:block/centrifuge"},"assembled=true,running=false":{"model":"create_chemical_processing:block/centrifuge"},"assembled=true,running=true":{"model":"create_chemical_processing:block/centrifuge"}}}
