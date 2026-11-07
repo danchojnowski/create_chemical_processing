@@ -4,5 +4,6 @@
   "message.create_chemical_processing.centrifuge.invalid": "Invalid centrifuge structure.",
   "message.create_chemical_processing.centrifuge.unloaded": "The centrifuge area must be loaded.",
   "message.create_chemical_processing.centrifuge.running": "Centrifuge assembled and shaft speed is sufficient.",
-  "message.create_chemical_processing.centrifuge.slow": "Centrifuge assembled: connect a vertical shaft below the upward-facing bearing and provide at least %s RPM."
+  "message.create_chemical_processing.centrifuge.slow": "Centrifuge assembled: connect a vertical shaft below the upward-facing bearing and provide at least %s RPM.",
+  "entity.create_chemical_processing.centrifuge": "Centrifuge"
 }

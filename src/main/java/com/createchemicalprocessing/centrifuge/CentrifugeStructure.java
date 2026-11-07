@@ -41,13 +41,13 @@ public final class CentrifugeStructure {
     public static BlockPos findBearing(LevelReader level, BlockPos controller) {
         if (!isAreaLoaded(level, controller)) return null;
         Block bearing = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(BEARING);
-        for (int bearingY = controller.getY() - 4; bearingY >= level.getMinBuildHeight(); bearingY--) {
+        for (int bearingY = controller.getY() - 3; bearingY >= level.getMinBuildHeight(); bearingY--) {
             BlockPos bearingPos = new BlockPos(controller.getX(), bearingY, controller.getZ());
             if (!level.getBlockState(bearingPos).is(bearing)) continue;
-            int height = controller.getY() - bearingY - 3;
+            int height = controller.getY() - bearingY - 2;
             for (int width = 1; width <= 3; width++) {
                 int offset = (width - 1) / 2;
-                BlockPos origin = bearingPos.offset(-offset, 1, -offset);
+                BlockPos origin = bearingPos.offset(-offset, 0, -offset);
                 if (isValid(level, origin, width, height)) return bearingPos;
             }
         }
@@ -62,13 +62,13 @@ public final class CentrifugeStructure {
     public static List<BlockPos> diagnose(LevelReader level, BlockPos controller) {
         List<BlockPos> best = null;
         Block bearing = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(BEARING);
-        for (int y = controller.getY() - 4; y >= level.getMinBuildHeight(); y--) {
+        for (int y = controller.getY() - 3; y >= level.getMinBuildHeight(); y--) {
             BlockPos base = new BlockPos(controller.getX(), y, controller.getZ());
             if (!level.getBlockState(base).is(bearing)) continue;
-            int height = controller.getY() - y - 3;
+            int height = controller.getY() - y - 2;
             for (int width = 1; width <= 3; width++) {
                 int offset = (width - 1) / 2;
-                List<BlockPos> errors = invalidBlocks(level, base.offset(-offset, 1, -offset), width, height);
+                List<BlockPos> errors = invalidBlocks(level, base.offset(-offset, 0, -offset), width, height);
                 if (best == null || errors.size() < best.size()) best = errors;
             }
         }
@@ -85,8 +85,10 @@ public final class CentrifugeStructure {
                 BlockPos roof = origin.offset(x, height + 1, z);
                 BlockState floorState = level.getBlockState(floor);
                 BlockState roofState = level.getBlockState(roof);
-                if (!floorState.is(FLOORS) || !(floorState.getBlock() instanceof SlabBlock) || floorState.getValue(SlabBlock.TYPE) != SlabType.BOTTOM) errors.add(floor);
-                if (!roofState.is(ROOFS) || !(roofState.getBlock() instanceof StairBlock)) errors.add(roof);
+                boolean bearingPosition = x == (width - 1) / 2 && z == (width - 1) / 2;
+                if (bearingPosition ? !floorState.is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(BEARING))
+                        : !floorState.is(FLOORS) || !(floorState.getBlock() instanceof SlabBlock) || floorState.getValue(SlabBlock.TYPE) != SlabType.BOTTOM) errors.add(floor);
+                if (edge ? !roofState.is(ROOFS) || !(roofState.getBlock() instanceof StairBlock) : !roofState.is(WALLS)) errors.add(roof);
                 for (int y = 1; y <= height; y++) {
                     BlockPos pos = origin.offset(x, y, z);
                     BlockState state = level.getBlockState(pos);
@@ -100,15 +102,15 @@ public final class CentrifugeStructure {
     /**
      * Checks a square chamber, including its one-block-thick shell. Floor is at origin Y;
      * height counts empty interior blocks above it. Returns false for unloaded positions.
-     * The bearing is centered below the floor, rounded toward north-west for even sizes.
+     * The bearing replaces the center floor slab, rounded toward north-west for even sizes.
      */
     public static boolean isValid(LevelReader level, BlockPos origin, int width, int height) {
         if (width < 1 || width > 3 || height < 1 || height > level.getMaxBuildHeight() - level.getMinBuildHeight()) return false;
         long roofY = (long) origin.getY() + height + 1;
-        if (origin.getY() <= level.getMinBuildHeight() || roofY + 1 >= level.getMaxBuildHeight()) return false;
+        if (origin.getY() < level.getMinBuildHeight() || roofY + 1 >= level.getMaxBuildHeight()) return false;
         BlockPos controllerPos = origin.offset((width - 1) / 2, height + 2, (width - 1) / 2);
         if (!level.hasChunkAt(controllerPos) || !level.getBlockState(controllerPos).is(CreateChemicalProcessing.CENTRIFUGE.get())) return false;
-        BlockPos bearingPos = origin.offset((width - 1) / 2, -1, (width - 1) / 2);
+        BlockPos bearingPos = origin.offset((width - 1) / 2, 0, (width - 1) / 2);
         if (!level.hasChunkAt(bearingPos) || !level.getBlockState(bearingPos).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(BEARING))) return false;
         for (int x = -1; x <= width; x++) {
             for (int z = -1; z <= width; z++) {

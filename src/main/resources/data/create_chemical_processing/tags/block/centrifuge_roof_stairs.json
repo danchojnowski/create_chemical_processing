@@ -1,4 +1,4 @@
 {
   "replace": false,
-  "values": ["minecraft:stone_brick_stairs"]
+  "values": ["minecraft:stone_brick_stairs", "minecraft:deepslate_brick_stairs", "minecraft:polished_deepslate_stairs", "minecraft:cobbled_deepslate_stairs", "minecraft:deepslate_tile_stairs"]
 }

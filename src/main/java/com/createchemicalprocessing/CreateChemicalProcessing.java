@@ -2,6 +2,10 @@ package com.createchemicalprocessing;
 
 import com.createchemicalprocessing.centrifuge.CentrifugeBlock;
 import com.createchemicalprocessing.centrifuge.CentrifugeConfig;
+import com.simibubi.create.content.contraptions.ControlledContraptionEntity;
+import net.minecraft.network.chat.Component;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.minecraft.world.item.BlockItem;
@@ -28,9 +32,19 @@ public class CreateChemicalProcessing {
 
     public CreateChemicalProcessing(IEventBus modBus, ModContainer container) {
         container.registerConfig(ModConfig.Type.SERVER, CentrifugeConfig.SPEC);
+        NeoForge.EVENT_BUS.addListener(CreateChemicalProcessing::onContraptionJoin);
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
         modBus.addListener(this::addCreativeItems);
+    }
+
+    private static void onContraptionJoin(EntityJoinLevelEvent event) {
+        if (event.getLevel().isClientSide() || !(event.getEntity() instanceof ControlledContraptionEntity entity)
+                || entity.getContraption() == null || entity.hasCustomName()) return;
+        boolean assembledCentrifuge = entity.getContraption().getBlocks().values().stream()
+                .anyMatch(info -> info.state().is(CENTRIFUGE.get())
+                        && info.state().getValue(CentrifugeBlock.ASSEMBLED));
+        if (assembledCentrifuge) entity.setCustomName(Component.translatable("entity.create_chemical_processing.centrifuge"));
     }
 
     private void addCreativeItems(BuildCreativeModeTabContentsEvent event) {
